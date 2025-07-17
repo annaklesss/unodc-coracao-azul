@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Campanha Coração Azul</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f0f0f0;
+      padding: 2em;
+    }
+    canvas {
+      max-width: 100%;
+      border: 1px solid #ccc;
+      margin-top: 1em;
+    }
+    input, button {
+      margin: 1em;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Adiciona o filtro da campanha "Coração Azul"</h2>
+  <input type="file" accept="image/*" id="upload">
+  <br>
+  <canvas id="canvas"></canvas>
+  <br>
+  <button id="download" style="display:none;">Baixar imagem com filtro</button>
+
+  <script>
+    const upload = document.getElementById("upload");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const downloadBtn = document.getElementById("download");
+
+    const logo = new Image();
+    logo.src = "Template (1).png"; // Ensure this image is in the same directory
+
+    upload.addEventListener("change", function () {
+      const file = this.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const userImg = new Image();
+        userImg.onload = function () {
+          // Resize canvas to match uploaded image
+          canvas.width = userImg.width;
+          canvas.height = userImg.height;
+
+          // Draw user image
+          ctx.drawImage(userImg, 0, 0);
+
+          // Wait for logo to load
+          logo.onload = () => {
+            // Draw logo at bottom right corner
+            const logoWidth = userImg.width * 0.5;
+            const logoHeight = logo.height * (logoWidth / logo.width);
+            const x = userImg.width - logoWidth - 20;
+            const y = userImg.height - logoHeight - 20;
+            ctx.drawImage(logo, x, y, logoWidth, logoHeight);
+
+            downloadBtn.style.display = "inline-block";
+          };
+
+          // If already loaded (cached), draw immediately
+          if (logo.complete) {
+            const logoWidth = userImg.width * 0.5;
+            const logoHeight = logo.height * (logoWidth / logo.width);
+            const x = userImg.width - logoWidth - 20;
+            const y = userImg.height - logoHeight - 20;
+            ctx.drawImage(logo, x, y, logoWidth, logoHeight);
+            downloadBtn.style.display = "inline-block";
+          }
+        };
+        userImg.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    downloadBtn.addEventListener("click", function () {
+      const link = document.createElement("a");
+      link.download = "coracao-azul-filtro.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+  </script>
+
+</body>
+</html>
